@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RxJS sample</title>
+  <script src="https://unpkg.com/@reactivex/rxjs@5.4.0/dist/global/Rx.js"></script>
+</head>
+<body>
+<div style="position: fixed">
+  <p>スクロール位置がコンソールに出力され、背景色が変化します。</p>
+  <p>スクロール位置：<span id="result"></span></p>
+  <button id="subscribe">購読開始</button>
+  <button id="unsubscribe">購読停止</button>
+</div>
+<div id="scrollableEl" style="height: 5000px"></div>
+<script>
+  const subscriptions = []
+  const scroll$ = Rx.Observable.fromEvent(document, 'scroll')
+
+  const start = (stream) => {
+    subscriptions.push(
+      stream.subscribe(ev => {
+        const alpha = ev.target.body.scrollTop / 5000
+        ev.target.body.style.background = `rgba(0, 0, 128, ${alpha})`
+        console.log(Date.now())
+      })
+    )
+  }
+
+  const stop = () => {
+    subscriptions.forEach(subscription => {
+      subscription.unsubscribe()
+    })
+  }
+
+  const subscribeEl = document.querySelector('#subscribe')
+  Rx.Observable
+    .fromEvent(subscribeEl, 'click')
+    .subscribe(() => {
+      start(scroll$)
+    })
+
+  const unsubscribeEl = document.querySelector('#unsubscribe')
+  Rx.Observable
+    .fromEvent(unsubscribeEl, 'click')
+    .subscribe(() => {
+      stop()
+    })
+
+</script>
+</body>
+</html>
